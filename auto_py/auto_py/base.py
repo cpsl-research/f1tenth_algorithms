@@ -6,6 +6,7 @@ from rclpy.node import Node
 import ackermann_msgs.msg
 import sensor_msgs.msg
 import std_msgs.msg
+import sensor_msgs.msg
 
 
 class AutoControlException(Exception):
@@ -61,6 +62,7 @@ class AutoControl(Node):
 
         # Subscribe to joy_teleop for the deadman switch
         self.joy_sub = self.create_subscription(sensor_msgs.msg.Joy, 'joy', self.joy_callback, qos)
+        self.lidar_sub = self.create_subscription(sensor_msgs.msg.LaserScan, 'scan', self.receive_lidar, qos)
 
         # Create publisher on drive
         self.pub = self.create_publisher(ackermann_msgs.msg.AckermannDriveStamped, "drive", qos)
@@ -88,3 +90,6 @@ class AutoControl(Node):
 
     def get_control_command(self):
         raise NotImplementedError
+    
+    def receive_lidar(self, msg: sensor_msgs.msg.LaserScan):
+        pass
