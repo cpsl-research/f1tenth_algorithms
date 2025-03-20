@@ -1,14 +1,22 @@
-#wiggle code below
-import rclpy
-import ackermann_msgs.msg
+# wiggle code below
 import time
-from .base import set_member, AutoControl, AutoControlException
+
+import ackermann_msgs.msg
+import rclpy
+
+from .base import AutoControl, AutoControlException, set_member
 
 
 class WiggleControl(AutoControl):
-    #drives in square (theoretcally)
+    # drives in square (theoretcally)
 
-    def __init__(self, dt_state: float = 1.5, n_states: int = 4, speed: float = 1.0, angular_velocity: float = 1.0):
+    def __init__(
+        self,
+        dt_state: float = 1.5,
+        n_states: int = 4,
+        speed: float = 1.0,
+        angular_velocity: float = 1.0,
+    ):
         super().__init__()
         self.state = 0
         self.start_time = time.time()
@@ -40,12 +48,12 @@ class WiggleControl(AutoControl):
             self.increment_state()
 
         return msg
-    
+
     def increment_state(self):
         self.state = (self.state + 1) % self.n_states
         self.start_time = time.time()
 
-    @staticmethod  
+    @staticmethod
     def get_steering_angle(state: int) -> float:
         if state in [0, 2]:
             ang = 0.0
@@ -56,7 +64,7 @@ class WiggleControl(AutoControl):
         else:
             raise NotImplementedError(state)
         return ang
-    
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -71,4 +79,3 @@ def main(args=None):
 
     node.destroy_node()
     rclpy.shutdown()
-

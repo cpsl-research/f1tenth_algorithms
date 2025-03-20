@@ -1,7 +1,7 @@
-import rclpy
 import ackermann_msgs.msg
+import rclpy
 
-from .base import set_member, AutoControl, AutoControlException
+from .base import AutoControl, AutoControlException, set_member
 
 
 class StraightControl(AutoControl):
