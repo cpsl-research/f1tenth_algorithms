@@ -27,7 +27,7 @@ setup(
         "console_scripts": [
             "straight_control = auto_py.straight:main",
             "wiggle_control = auto_py.wiggle:main",
-            "roomba_control = auto_py.roomba_mode:main",
+            "roomba_control = auto_py.roomba:main",
             "listener = auto_py.lidar_subscriber:main",  # NEW - LIDAR SUBSCRIBER
         ],
     },
