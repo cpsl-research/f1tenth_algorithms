@@ -1,15 +1,13 @@
-# wiggle code below
+import math
 import time
 
-import ackermann_msgs.msg
 import rclpy
+from ackermann_msgs.msg import AckermannDrive, AckermannDriveStamped
 
 from .base import AutoControl, AutoControlException, set_member
 
 
 class WiggleControl(AutoControl):
-    # drives in square (theoretcally)
-
     def __init__(
         self,
         dt_state: float = 1.5,
@@ -25,9 +23,9 @@ class WiggleControl(AutoControl):
         self.speed = speed
         self.angular_velocity = angular_velocity
 
-    def get_control_command(self) -> ackermann_msgs.msg.AckermannDriveStamped:
+    def get_control_command(self) -> AckermannDriveStamped:
         # get ackermann command
-        drive = ackermann_msgs.msg.AckermannDrive()
+        drive = AckermannDrive()
 
         # -- lateral
         set_member(drive, "steering_angle", self.get_steering_angle(self.state))
@@ -39,7 +37,7 @@ class WiggleControl(AutoControl):
         set_member(drive, "jerk", 0.0)
 
         # package in stamped message
-        msg = ackermann_msgs.msg.AckermannDriveStamped()
+        msg = AckermannDriveStamped()
         set_member(msg.header, "stamp", self.get_clock().now().to_msg())
         set_member(msg, "drive", drive)
 
@@ -54,13 +52,13 @@ class WiggleControl(AutoControl):
         self.start_time = time.time()
 
     @staticmethod
-    def get_steering_angle(state: int) -> float:
+    def get_steering_angle(state: int, turn_ang: float = math.pi / 4) -> float:
         if state in [0, 2]:
             ang = 0.0
         elif state == 1:
-            ang = 0.78539  # turn left
+            ang = turn_ang  # turn left
         elif state == 3:
-            ang = -0.78539  # turn right
+            ang = -turn_ang  # turn right
         else:
             raise NotImplementedError(state)
         return ang

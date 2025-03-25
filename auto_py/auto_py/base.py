@@ -1,11 +1,11 @@
 import importlib
 import typing
 
-import ackermann_msgs.msg
 import rclpy
-import sensor_msgs.msg
 import std_msgs.msg
+from ackermann_msgs.msg import AckermannDriveStamped
 from rclpy.node import Node
+from sensor_msgs.msg import Joy, LaserScan
 
 
 class AutoControlException(Exception):
@@ -71,17 +71,15 @@ class AutoControl(Node):
         )
 
         # Subscribe to joy_teleop for the deadman switch
-        self.joy_sub = self.create_subscription(
-            sensor_msgs.msg.Joy, "joy", self.joy_callback, qos
-        )
+        self.joy_sub = self.create_subscription(Joy, "joy", self.joy_callback, qos)
+
+        # Subscribe to lidar for sensor data
         self.lidar_sub = self.create_subscription(
-            sensor_msgs.msg.LaserScan, "scan", self.receive_lidar, qos
+            LaserScan, "scan", self.receive_lidar, qos
         )
 
         # Create publisher on drive
-        self.pub = self.create_publisher(
-            ackermann_msgs.msg.AckermannDriveStamped, "drive", qos
-        )
+        self.pub = self.create_publisher(AckermannDriveStamped, "drive", qos)
 
         # Create timer to publish messages
         timer_period = 1.0 / 100  # seconds
@@ -91,7 +89,7 @@ class AutoControl(Node):
         self.deadman = msg.data
         self.init = True
 
-    def joy_callback(self, joy_state: sensor_msgs.msg.Joy) -> None:
+    def joy_callback(self, joy_state: Joy) -> None:
         if self.init:
             self.active = joy_state.buttons[self.deadman] == 1
         else:
@@ -100,12 +98,22 @@ class AutoControl(Node):
 
     def timer_callback(self) -> None:
         if (self.last_heard is not None) and (self.active):
+            # get the latest command
             t_now = 1e-9 * self.get_clock().now().nanoseconds
             if t_now - self.last_heard < self.heard_tolerance:
                 self.pub.publish(self.get_control_command())
+        else:
+            # publish null command
+            self.pub.publish(self.get_null_command())
 
-    def get_control_command(self):
+    def get_control_command(self) -> AckermannDriveStamped:
         raise NotImplementedError
 
-    def receive_lidar(self, msg: sensor_msgs.msg.LaserScan):
+    def get_null_command(self) -> AckermannDriveStamped:
+        """Returns an empty and stamped ackermann drive message"""
+        msg = AckermannDriveStamped()
+        set_member(msg.header, "stamp", self.get_clock().now().to_msg())
+        return msg
+
+    def receive_lidar(self, msg: LaserScan):
         pass

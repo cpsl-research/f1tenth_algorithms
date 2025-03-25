@@ -1,5 +1,5 @@
-import ackermann_msgs.msg
 import rclpy
+from ackermann_msgs.msg import AckermannDrive, AckermannDriveStamped
 
 from .base import AutoControl, AutoControlException, set_member
 
@@ -10,9 +10,9 @@ class StraightControl(AutoControl):
     def __init__(self):
         super().__init__()
 
-    def get_control_command(self) -> ackermann_msgs.msg.AckermannDriveStamped:
+    def get_control_command(self) -> AckermannDriveStamped:
         # get ackermann command
-        drive = ackermann_msgs.msg.AckermannDrive()
+        drive = AckermannDrive()
         # -- lateral
         set_member(drive, "steering_angle", 0.0)
         set_member(drive, "steering_angle_velocity", 0.0)
@@ -22,7 +22,7 @@ class StraightControl(AutoControl):
         set_member(drive, "jerk", 0.0)
 
         # package in stamped message
-        msg = ackermann_msgs.msg.AckermannDriveStamped()
+        msg = AckermannDriveStamped()
         set_member(msg.header, "stamp", self.get_clock().now().to_msg())
         set_member(msg, "drive", drive)
 

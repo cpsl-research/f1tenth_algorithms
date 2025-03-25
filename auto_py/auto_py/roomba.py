@@ -1,11 +1,8 @@
-# for driving
 import time
 
-import ackermann_msgs.msg
-
-# for sensing
 import numpy as np
 import rclpy
+from ackermann_msgs.msg import AckermannDrive, AckermannDriveStamped
 from sensor_msgs.msg import LaserScan
 
 from .base import AutoControl, AutoControlException, set_member
@@ -18,11 +15,11 @@ class RoombaControl(AutoControl):
 
     def get_control_command(
         self, start_time: float = time.time(), backing_status=0
-    ) -> ackermann_msgs.msg.AckermannDriveStamped:
+    ) -> AckermannDriveStamped:
         self.start_time = start_time
         self.backing_status = backing_status
         # get ackermann command
-        drive = ackermann_msgs.msg.AckermannDrive()
+        drive = AckermannDrive()
         set_member(drive, "steering_angle_velocity", 0.0)
         set_member(drive, "acceleration", 0.0)
         set_member(drive, "jerk", 0.0)
@@ -39,7 +36,7 @@ class RoombaControl(AutoControl):
             set_member(drive, "speed", 0.5)
 
         # package in stamped message
-        msg = ackermann_msgs.msg.AckermannDriveStamped()
+        msg = AckermannDriveStamped()
         set_member(msg.header, "stamp", self.get_clock().now().to_msg())
         set_member(msg, "drive", drive)
 
@@ -50,7 +47,7 @@ class RoombaControl(AutoControl):
 
         return msg
 
-    def get_speed(backing_status):
+    def get_speed(backing_status: int):
         speed = 0.0
         if backing_status == 0:
             speed = 0.5
