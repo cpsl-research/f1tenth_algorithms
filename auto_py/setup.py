@@ -25,9 +25,9 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "straight_control = auto_py.straight:main",
-            "wiggle_control = auto_py.wiggle:main",
-            "roomba_control = auto_py.roomba:main",
+            "straight_control = auto_py.drive_nodes.straight:main",
+            "wiggle_control = auto_py.drive_nodes.wiggle:main",
+            "roomba_control = auto_py.drive_nodes.roomba:main",
         ],
     },
 )
