@@ -14,7 +14,12 @@
   <depend>joy_teleop</depend>
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
-
+  
+  <exec_depend>avstack_bridge</exec_depend>
+  <exec_depend>avstack_msgs</exec_depend>
+  <exec_depend>avstack_msgs_rviz_plugins</exec_depend>
+  <exec_depend>vision_msgs_rviz_plugins</exec_depend>
+  
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>

@@ -9,6 +9,7 @@ from auto_py.perception.object_detection import ObjectDetectionClusterer
 from auto_py.perception.wall_detection import WallDetectionClusterer
 from sensor_msgs.msg import LaserScan
 
+from ..perception.base import Cluster, laser_scan_to_points
 from .base import AutoControl, AutoControlException, set_member
 
 
@@ -19,6 +20,8 @@ class RoombaControl(AutoControl):
         reverse_speed: float = -0.25,
         reverse_time: float = 1.0,
         reverse_angle: float = 15 * math.pi / 180,
+        delta_az_front: float = 15 * np.pi / 180,
+        range_close: float = 3,
     ):
         """Initialize a controller in Roomba mode"""
         super().__init__()
@@ -26,6 +29,8 @@ class RoombaControl(AutoControl):
         self.reverse_speed = reverse_speed
         self.reverse_time = reverse_time
         self.reverse_angle = reverse_angle
+        self.delta_az_front = delta_az_front
+        self.range_close = range_close
         self.is_path_blocked = False
         self.reversing = False
         self._reverse_start_time = -np.inf
@@ -68,25 +73,52 @@ class RoombaControl(AutoControl):
 
         return msg
 
-    def receive_lidar(self, msg: LaserScan):
-        # TODO convert to numpy array of points
-        points = np.zeros((0, 2))  # 2d array of points
+    def receive_lidar(
+        self,
+        msg: LaserScan,
+    ):
+        # convert to numpy array of points
+        points = laser_scan_to_points(msg)
 
         # run detection algorithms
+        self.is_path_blocked = False
         objs = self.detect_obstacles(points)
         walls = self.detect_obstacles(points)
 
-        # process the objs/walls
-        # TODO
+        # process the objs
+        for obj in objs:
+            front = (-self.delta_az_front <= obj.azimuths) & (
+                obj.azimuths <= self.delta_az_front
+            )
+            close = obj.ranges <= self.range_close
+            if np.any(front & close):
+                self.is_path_blocked = True
+                break
 
-        # set ego state based on the results
-        self.is_path_blocked = False  # TODO
+        # process the walls
+        for wall in walls:
+            raise NotImplementedError()
 
-    def detect_obstacles(self, points: np.ndarray) -> List[np.ndarray]:
+    def detect_obstacles(self, points: np.ndarray) -> List[Cluster]:
         return self.obj_detector(points)
 
     def detect_walls(self, points: np.ndarray) -> List[np.ndarray]:
         return self.wall_detector(points)
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = RoombaControl()
+
+    try:
+        rclpy.spin(node)
+    except AutoControlException as e:
+        node.get_logger().error(e.message)
+    except KeyboardInterrupt:
+        pass
+
+    node.destroy_node()
+    rclpy.shutdown()
 
 
 # def receive_lidar_OLD(self, msg: LaserScan):
@@ -114,18 +146,3 @@ class RoombaControl(AutoControl):
 #             if distance < 2:
 #                 return True
 #     return False
-
-
-def main(args=None):
-    rclpy.init(args=args)
-    node = RoombaControl()
-
-    try:
-        rclpy.spin(node)
-    except AutoControlException as e:
-        node.get_logger().error(e.message)
-    except KeyboardInterrupt:
-        pass
-
-    node.destroy_node()
-    rclpy.shutdown()

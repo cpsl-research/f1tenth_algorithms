@@ -1,0 +1,6 @@
+[submodule "submodules/avstack-core"]
+	path = submodules/avstack-core
+	url = https://github.com/avstack-lab/avstack-core
+[submodule "submodules/avstack-rosbridge"]
+	path = submodules/avstack-rosbridge
+	url = https://github.com/avstack-lab/avstack-rosbridge
