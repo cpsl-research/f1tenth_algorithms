@@ -1,11 +1,11 @@
 import importlib
 import typing
 
-import rclpy
+from rclpy import qos
 import std_msgs.msg
 from ackermann_msgs.msg import AckermannDriveStamped
 from rclpy.node import Node
-from sensor_msgs.msg import Joy, LaserScan
+from sensor_msgs.msg import Joy
 
 
 class AutoControlException(Exception):
@@ -58,28 +58,23 @@ class AutoControl(Node):
         self.heard_tolerance = heard_tolerance  # seconds
 
         # Don't subscribe until everything has been initialized.
-        qos = rclpy.qos.QoSProfile(
-            history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST,
+        qos_profile = qos.QoSProfile(
+            history=qos.QoSHistoryPolicy.KEEP_LAST,
             depth=1,
-            reliability=rclpy.qos.QoSReliabilityPolicy.RELIABLE,
-            durability=rclpy.qos.QoSDurabilityPolicy.VOLATILE,
+            reliability=qos.QoSReliabilityPolicy.RELIABLE,
+            durability=qos.QoSDurabilityPolicy.VOLATILE,
         )
 
         # Subscribe to the auto control init
         self.init_sub = self.create_subscription(
-            std_msgs.msg.Int8, "auto_init", self.init_callback, qos
+            std_msgs.msg.Int8, "auto_init", self.init_callback, qos_profile
         )
 
         # Subscribe to joy_teleop for the deadman switch
-        self.joy_sub = self.create_subscription(Joy, "joy", self.joy_callback, qos)
-
-        # Subscribe to lidar for sensor data
-        self.lidar_sub = self.create_subscription(
-            LaserScan, "scan", self.receive_lidar, qos
-        )
+        self.joy_sub = self.create_subscription(Joy, "joy", self.joy_callback, qos_profile)
 
         # Create publisher on drive
-        self.pub = self.create_publisher(AckermannDriveStamped, "drive", qos)
+        self.pub = self.create_publisher(AckermannDriveStamped, "drive", qos_profile)
 
         # Create timer to publish messages
         timer_period = 1.0 / 100  # seconds
@@ -114,6 +109,3 @@ class AutoControl(Node):
         msg = AckermannDriveStamped()
         set_member(msg.header, "stamp", self.get_clock().now().to_msg())
         return msg
-
-    def receive_lidar(self, msg: LaserScan):
-        pass
