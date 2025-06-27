@@ -1,11 +1,12 @@
 from argparse import ArgumentParser
-import numpy as np
 from functools import partial
-import matplotlib.pyplot as plt
+
 import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
+from cluster_tracker import ClusterTracker
 from sklearn.cluster import DBSCAN
 from sklearn.neighbors import NearestNeighbors
-from cluster_tracker import ClusterTracker
 
 
 # Environment setup (walls, background)
@@ -15,6 +16,7 @@ def generate_static_environment(env_points, lidar_range):
     x = r * np.cos(theta)
     y = r * np.sin(theta)
     return np.vstack((x, y)).T
+
 
 # Generate pedestrian point clusters
 def generate_pedestrian(x, y, num_points_per_pedestrian):
@@ -30,15 +32,16 @@ def dbscan_cluster(points, eps, min_samples):
     labels = model.fit_predict(points)
     return labels
 
+
 def filter_sparse_points(points, radius, min_neighbors):
     """
     Removes points that do not have enough neighbors within a given radius.
-    
+
     Args:
         points (np.ndarray): shape (N, 2)
         radius (float): Distance threshold
         min_neighbors (int): Minimum required neighbors (excluding self)
-    
+
     Returns:
         np.ndarray: Filtered points
     """
@@ -50,6 +53,7 @@ def filter_sparse_points(points, radius, min_neighbors):
 
     mask = np.array([len(n) - 1 >= min_neighbors for n in neighbors])  # exclude self
     return points[mask]
+
 
 def main(args):
     ##############################################
@@ -70,7 +74,7 @@ def main(args):
     lidar_range = 30
     frame_count = 100
     env_points = 500  # static background points
-        
+
     # Initialize pedestrian positions and velocities
     pedestrian_positions = np.random.uniform(-10, 10, (num_pedestrians, 2))
     pedestrian_velocities = np.random.uniform(-0.1, 0.1, (num_pedestrians, 2))
@@ -82,8 +86,8 @@ def main(args):
     sc = ax.scatter([], [], s=1)
     ax.set_xlim(-lidar_range, lidar_range)
     ax.set_ylim(-lidar_range, lidar_range)
-    ax.set_aspect('equal')
-    ax.set_title('2D LiDAR Simulation with Moving Pedestrians')
+    ax.set_aspect("equal")
+    ax.set_title("2D LiDAR Simulation with Moving Pedestrians")
     tracker = ClusterTracker(max_distance=0.7, min_samples=5)
 
     def update(pedestrian_positions, frame):
@@ -97,7 +101,6 @@ def main(args):
             ped_points = generate_pedestrian(*pos, num_points_per_pedestrian)
             all_points = np.vstack((all_points, ped_points))
 
-
         # NOTE: For the following tasks, you are able to use external
         # resources such as generative AI to assist you. However, I
         # expect you to take the time to understand what the code is doing
@@ -110,7 +113,7 @@ def main(args):
         ##############################################
         # STEP 1:
         # use a clustering algorithm to perform
-        # detection of the pedestrians in this 2D 
+        # detection of the pedestrians in this 2D
         # point cloud. Do some analysis of the benefits
         # of different methods. Consider tuning the
         # parameters and perform a research study of
@@ -127,12 +130,12 @@ def main(args):
         ##############################################
         # STEP 2:
         # use a multi-object tracking algorithm
-        # to follow the clusters over time. This 
+        # to follow the clusters over time. This
         # should maintain consistentn identification
         # on which object is which. By following the
-        # position information over time from the 
+        # position information over time from the
         # detections, you should be able to estimate a
-        # velocity of each object as it moves in 
+        # velocity of each object as it moves in
         # the scene. Evaluate the false positive and
         # false negative rates of your tracker.
         # Introduce noise and evaluate the tracker.
@@ -148,15 +151,17 @@ def main(args):
         print(f"Cluster IDs at frame {frame}: {np.unique(cluster_ids)}")
 
         # Use a consistent color map for each cluster
-        colors = plt.cm.get_cmap('tab10', np.max(cluster_ids) + 2)
-        color_list = [colors(cluster_id) if cluster_id != -1 else (0.5, 0.5, 0.5, 0.5) for cluster_id in cluster_ids]
-        
+        colors = plt.cm.get_cmap("tab10", np.max(cluster_ids) + 2)
+        color_list = [
+            colors(cluster_id) if cluster_id != -1 else (0.5, 0.5, 0.5, 0.5)
+            for cluster_id in cluster_ids
+        ]
 
         # TODO
 
         ##############################################
-        # STEP 3: 
-        # write a motion predictor that takes 
+        # STEP 3:
+        # write a motion predictor that takes
         # a history of the estimated state of each object
         # and predicts the future trajectory forward in
         # time. Show the predicted trajectory on the
@@ -171,11 +176,13 @@ def main(args):
 
         sc.set_offsets(filtered_points)
         sc.set_color(color_list)
-        
-        return sc,
+
+        return (sc,)
 
     update_partial = partial(update, pedestrian_positions)
-    ani = animation.FuncAnimation(fig, update_partial, frames=frame_count, interval=100, blit=True)
+    ani = animation.FuncAnimation(
+        fig, update_partial, frames=frame_count, interval=100, blit=True
+    )
     plt.show()
 
 

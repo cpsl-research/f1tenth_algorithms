@@ -1,13 +1,14 @@
 # motion_predictor.py
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
 
 class MotionPredictor:
     def __init__(self, prediction_horizon=10, delta_t=1.0):
         """
         Initialize the motion predictor.
-        
+
         Args:
             prediction_horizon (int): Number of steps to predict into the future
             delta_t (float): Time step between frames (seconds)
@@ -25,7 +26,7 @@ class MotionPredictor:
             position (np.ndarray): Current position of the object [x, y]
             velocity (np.ndarray): Current velocity of the object [vx, vy]
         """
-        self.history[object_id] = {'position': position, 'velocity': velocity}
+        self.history[object_id] = {"position": position, "velocity": velocity}
 
     def predict(self, object_id):
         """
@@ -41,8 +42,8 @@ class MotionPredictor:
             raise ValueError(f"Object {object_id} not found in history")
 
         # Retrieve the last known position and velocity
-        position = self.history[object_id]['position']
-        velocity = self.history[object_id]['velocity']
+        position = self.history[object_id]["position"]
+        velocity = self.history[object_id]["velocity"]
 
         # Generate predicted positions for the future
         predicted_positions = []
@@ -55,7 +56,7 @@ class MotionPredictor:
     def plot_trajectory(self, object_id, ax=None):
         """
         Plot the predicted trajectory for an object.
-        
+
         Args:
             object_id (int): Unique identifier for the object
             ax (matplotlib.axes.Axes): Axes object to plot on (optional)
@@ -72,10 +73,10 @@ class MotionPredictor:
 
         # Plot the predicted trajectory
         ax.plot(x_pred, y_pred, label=f"Object {object_id} Prediction")
-        ax.scatter(x_pred[0], y_pred[0], color='red', label=f"Object {object_id} Start")
+        ax.scatter(x_pred[0], y_pred[0], color="red", label=f"Object {object_id} Start")
 
-        ax.set_xlabel('X Position')
-        ax.set_ylabel('Y Position')
-        ax.set_title('Predicted Trajectories')
+        ax.set_xlabel("X Position")
+        ax.set_ylabel("Y Position")
+        ax.set_title("Predicted Trajectories")
         ax.legend()
         plt.show()

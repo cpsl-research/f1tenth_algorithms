@@ -7,8 +7,6 @@
   <maintainer email="spencer@shally.dev">Spencer Hallyburton</maintainer>
   <license>MIT</license>
 
-  <depend>python3-sklearn</depend>
-
   <depend>ackermann_msgs</depend>
   <depend>joy</depend>
   <depend>joy_teleop</depend>

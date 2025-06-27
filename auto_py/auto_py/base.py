@@ -1,9 +1,9 @@
 import importlib
 import typing
 
-from rclpy import qos
 import std_msgs.msg
 from ackermann_msgs.msg import AckermannDriveStamped
+from rclpy import qos
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
 
@@ -71,7 +71,9 @@ class AutoControl(Node):
         )
 
         # Subscribe to joy_teleop for the deadman switch
-        self.joy_sub = self.create_subscription(Joy, "joy", self.joy_callback, qos_profile)
+        self.joy_sub = self.create_subscription(
+            Joy, "joy", self.joy_callback, qos_profile
+        )
 
         # Create publisher on drive
         self.pub = self.create_publisher(AckermannDriveStamped, "drive", qos_profile)

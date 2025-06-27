@@ -1,13 +1,12 @@
-import rclpy
-from rclpy import qos
 import numpy as np
+import rclpy
 from ackermann_msgs.msg import AckermannDrive, AckermannDriveStamped
+from avstack_bridge.tracks import TrackBridge
+from avstack_msgs.msg import BoxTrackArray
+from rclpy import qos
 from std_msgs.msg import String
 
 from .base import AutoControl, AutoControlException, set_member
-
-from avstack_msgs.msg import BoxTrackArray
-from avstack_bridge.tracks import TrackBridge
 
 
 class Follower:
@@ -20,12 +19,8 @@ class Follower:
     def set_reference_point_from_tracks(self, tracks):
         # TODO
         # each track state is [x, y, z, h, w, l, vx, vy, vz]
-        track_states = [
-            track.x for track in tracks.data
-        ]
-        track_IDs = [
-            track.ID for track in tracks.data
-        ]
+        track_states = [track.x for track in tracks.data]
+        track_IDs = [track.ID for track in tracks.data]
 
         # set the reference point somehow
         reference_point = np.array([0, 0, 0])
@@ -89,7 +84,7 @@ class FollowerControl(AutoControl):
 
         # here take the reference point and set the speed and heading
         speed, steering_angle = self.model.speed_and_steering_from_reference()
-        set_member(drive, "speed", speed)  
+        set_member(drive, "speed", speed)
         set_member(drive, "steering_angle", steering_angle)
 
         # add the header
@@ -97,7 +92,6 @@ class FollowerControl(AutoControl):
         set_member(msg.header, "stamp", self.get_clock().now().to_msg())
         set_member(msg, "drive", drive)
         return msg
-
 
 
 def main(args=None):
