@@ -2,7 +2,7 @@ import numpy as np
 import rclpy
 from ackermann_msgs.msg import AckermannDrive, AckermannDriveStamped
 from avstack_bridge.tracks import TrackBridge
-from avstack_msgs.msg import BoxTrackArray
+from avstack_msgs.msg import BoxTrack3DArray
 from rclpy import qos
 from std_msgs.msg import String
 
@@ -55,7 +55,7 @@ class FollowerControl(AutoControl):
 
         # subscribe to the tracks
         self.subscriber_tracks = self.create_subscription(
-            BoxTrackArray,
+            BoxTrack3DArray,
             "tracks_3d",
             self.tracks_callback,
             qos_profile=qos_profile,
@@ -66,7 +66,7 @@ class FollowerControl(AutoControl):
             self.get_logger().info("Calling reset on follower")
             self.model.reset()
 
-    def tracks_callback(self, tracks_msg: BoxTrackArray):
+    def tracks_callback(self, tracks_msg: BoxTrack3DArray):
         # convert from ros types to avstack types
         tracks_avstack = TrackBridge.tracks_to_avstack(tracks_msg)
 
