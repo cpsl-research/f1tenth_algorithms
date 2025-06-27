@@ -99,8 +99,14 @@ class AutoControl(Node):
             t_now = 1e-9 * self.get_clock().now().nanoseconds
             if t_now - self.last_heard < self.heard_tolerance:
                 self.pub.publish(self.get_control_command())
+                # self.get_logger().info("Publishing control command")
         else:
             # publish null command
+            # if not self.active:
+            #     self.get_logger().info("Not active")
+            # if self.last_heard is None:
+            #     self.get_logger().info("No last heard")
+            # self.get_logger().info("Publishing null command")
             self.pub.publish(self.get_null_command())
 
     def get_control_command(self) -> AckermannDriveStamped:
